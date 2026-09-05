@@ -50,9 +50,9 @@ A root Go module needs no `with`. For a nested module, replace the action step:
           path: awesomeProject
 ```
 
-Before the first release, use a full commit SHA that the owner has committed and
-pushed to this public repository in place of `v1`. The examples describe the
-intended v1 usage; they do not imply that a release/tag has been published.
+Use `Spot2025/ordo-action@v1` to receive compatible v1 updates,
+`Spot2025/ordo-action@v1.0.0` to pin this release,
+or a full commit SHA for maximum supply-chain stability.
 
 ## Example output
 
