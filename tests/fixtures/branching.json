@@ -1,0 +1,48 @@
+{
+  "steps": [
+    {
+      "order": 1,
+      "cycle": false,
+      "functions": [
+        {
+          "id": "github.com/example/project/internal/store.LoadUser",
+          "file": "internal/store/user.go",
+          "line": 18
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "cycle": false,
+      "functions": [
+        {
+          "id": "github.com/example/project/internal/policy.CheckAccess",
+          "file": "internal/policy/access.go",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "cycle": false,
+      "functions": [
+        {
+          "id": "github.com/example/project/internal/audit.RecordAccess",
+          "file": "internal/audit/access.go",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "cycle": false,
+      "functions": [
+        {
+          "id": "github.com/example/project/internal/api.HandleUser",
+          "file": "internal/api/user.go",
+          "line": 51
+        }
+      ]
+    }
+  ]
+}

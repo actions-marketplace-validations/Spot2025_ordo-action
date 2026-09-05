@@ -1,0 +1,119 @@
+name: Ordo Review Path
+description: Dependency-aware review order for Go pull requests
+author: Ivan Shilyaev
+branding:
+  icon: git-pull-request
+  color: blue
+
+inputs:
+  path:
+    description: Repository-relative path to the Go module or Go workspace
+    required: false
+    default: .
+
+runs:
+  using: composite
+  steps:
+    - name: Validate pull request context
+      id: context
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        EVENT_NAME: ${{ github.event_name }}
+        SERVER_URL: ${{ github.server_url }}
+        BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
+        HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        set -euo pipefail
+        bash "${ACTION_PATH}/scripts/validate_event.sh"
+
+    - name: Check out exact pull request head
+      uses: actions/checkout@v7
+      with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.sha }}
+        path: .ordo-action/source
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Check out exact pull request base
+      uses: actions/checkout@v7
+      with:
+        repository: ${{ github.event.pull_request.base.repo.full_name }}
+        ref: ${{ github.event.pull_request.base.sha }}
+        path: .ordo-action/base
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Set up Go
+      uses: actions/setup-go@v7
+      with:
+        go-version: '1.25.x'
+        cache: false
+
+    - name: Import base history and resolve module path
+      id: prepare
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        SOURCE_ROOT: ${{ github.workspace }}/.ordo-action/source
+        BASE_ROOT: ${{ github.workspace }}/.ordo-action/base
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        # JSON preserves NUL for validation; OS environment strings cannot.
+        ORDO_PATH_JSON: ${{ toJSON(inputs.path) }}
+      run: |
+        set -euo pipefail
+        bash "${ACTION_PATH}/scripts/prepare.sh"
+
+    - name: Install Ordo v0.2.0
+      shell: bash
+      working-directory: ${{ steps.context.outputs.state_dir }}
+      env:
+        GOBIN: ${{ steps.context.outputs.state_dir }}/bin
+        GOWORK: 'off'
+      run: |
+        set -euo pipefail
+        mkdir -p -- "${GOBIN}"
+        go install github.com/Spot2025/ordo/cmd/ordo@v0.2.0
+
+    - name: Analyze pull request
+      id: analyze
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        MODULE_ROOT: ${{ steps.prepare.outputs.module_root }}
+        ORDO_BIN: ${{ steps.context.outputs.state_dir }}/bin/ordo
+        STATE_DIR: ${{ steps.context.outputs.state_dir }}
+      run: |
+        set -euo pipefail
+        bash "${ACTION_PATH}/scripts/analyze.sh"
+
+    - name: Render and publish review path
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        REPORT_PATH: ${{ steps.analyze.outputs.report_path }}
+        STATE_DIR: ${{ steps.context.outputs.state_dir }}
+        SERVER_URL: ${{ github.server_url }}
+        BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
+        HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        SOURCE_PREFIX: ${{ steps.prepare.outputs.source_prefix }}
+      run: |
+        set -euo pipefail
+        bash "${ACTION_PATH}/scripts/publish_summary.sh"
+
+    - name: Explain analysis failure
+      if: ${{ failure() }}
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        STATE_DIR: ${{ steps.context.outputs.state_dir }}
+      run: |
+        set -euo pipefail
+        bash "${ACTION_PATH}/scripts/failure_summary.sh"

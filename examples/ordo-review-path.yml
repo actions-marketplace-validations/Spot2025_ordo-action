@@ -1,0 +1,28 @@
+name: Ordo — Review Path
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ordo-review-path-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review-path:
+    if: ${{ github.event.pull_request.draft == false }}
+    name: Ordo — Review Path
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: Spot2025/ordo-action@v1
+        # For a nested Go module:
+        # with:
+        #   path: awesomeProject

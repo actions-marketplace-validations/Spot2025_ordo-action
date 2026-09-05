@@ -1,0 +1,2 @@
+# The golden Markdown preserves the dogfood renderer's two-space hard break.
+tests/fixtures/*.md whitespace=-blank-at-eol

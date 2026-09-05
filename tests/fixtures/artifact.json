@@ -1,0 +1,26 @@
+{
+  "steps": [
+    {
+      "order": 1,
+      "cycle": true,
+      "artifact": true,
+      "functions": [
+        {
+          "id": "(github.com/example/project/internal/dispatch.A).Run",
+          "file": "internal/dispatch/dispatch.go",
+          "line": 33
+        },
+        {
+          "id": "(github.com/example/project/internal/dispatch.B).Run",
+          "file": "internal/dispatch/dispatch.go",
+          "line": 38
+        },
+        {
+          "id": "(github.com/example/project/internal/dispatch.C).Run",
+          "file": "internal/dispatch/dispatch.go",
+          "line": 43
+        }
+      ]
+    }
+  ]
+}

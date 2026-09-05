@@ -1,0 +1,48 @@
+{
+  "steps": [
+    {
+      "order": 1,
+      "cycle": false,
+      "functions": [
+        {
+          "id": "github.com/example/project/internal/model.User.Validate",
+          "file": "internal/model/user.go",
+          "line": 42
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "cycle": false,
+      "functions": [
+        {
+          "id": "github.com/example/project/internal/storage.StoreUser",
+          "file": "internal/storage/user.go",
+          "line": 61
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "cycle": false,
+      "functions": [
+        {
+          "id": "github.com/example/project/internal/service.CreateUser",
+          "file": "internal/service/user.go",
+          "line": 94
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "cycle": false,
+      "functions": [
+        {
+          "id": "github.com/example/project/internal/api.HandleCreateUser",
+          "file": "internal/api/users.go",
+          "line": 31
+        }
+      ]
+    }
+  ]
+}
